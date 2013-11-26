@@ -15,11 +15,10 @@ class theme_matplotlib(theme):
     fname:  Filename (str)
         a filename to a matplotlibrc file
     matplotlib_defaults: bool (default: True)
-        if True resets the plot setting to the (current) matplotlib.rcParams values
+        if True resets the plot setting to the (current) matplotlib.rcParams
+        values
     """
         
-    _rcParams={}
-    
     def __init__(self, rc=None, fname=None,  matplotlib_defaults=True):
         """Initialize the theme
         
@@ -30,10 +29,20 @@ class theme_matplotlib(theme):
         fname:  Filename (str)
             a filename to a matplotlibrc file  
         matplotlib_defaults: bool
-            if True resets the plot setting to the (current) matplotlib.rcParams values
+            if True resets the plot setting to the (current) 
+            matplotlib.rcParams values
         """
+        self._rcParams={}
         if matplotlib_defaults:
-            self._rcParams.update(mpl.rcParams)
+            _copy = mpl.rcParams.copy()
+            # no need to a get a deprecate warning just because they are still included in 
+            # rcParams...
+            for key in mpl._deprecated_map:
+                if key in _copy:
+                    del _copy[key]
+            if 'tk.pythoninspect' in _copy:
+                del _copy['tk.pythoninspect']
+            self._rcParams.update(_copy)
         if fname:
             self._rcParams.update(mpl.rc_params_from_file(fname))
         if rc:

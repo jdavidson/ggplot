@@ -5,14 +5,23 @@ class facet_grid(object):
     def __init__(self, x=None, y=None, scales=None):
         self.x = x
         self.y = y
+        if self.x is None or self.y is None:
+            raise Exception("facet_grid(): need both x and y mapping! Use facet_wrap() for only one dimension.")
         self.ncol = None
         self.nrow = None
         self.scales = scales
 
     def __radd__(self, gg):
-
-        x = gg.data.get(self.x)
-        y = gg.data.get(self.y)
+        x = None
+        y = None
+        try:
+            x = gg.data.get(self.x)
+        except:
+            raise Exception("facet_grid(): mapping for x (\"%s\") is not available in the DataFrame" % self.x)
+        try:
+            y = gg.data.get(self.y)
+        except:
+            raise Exception("facet_grid(): mapping for y (\"%s\") is not available in the DataFrame" % self.y)
         if x is None:
             n_dim_x = 1
         else:
@@ -49,8 +58,11 @@ class facet_grid(object):
 
         combos = []
         for x_i in sorted(x.unique()):
-            for y_i in sorted(y.unique()):
-                combos.append((x_i, y_i))
+            if y is not None:
+                for y_i in sorted(y.unique()):
+                    combos.append((x_i, y_i))
+            else:
+                combos.append((x_i, 1))
         gg.facet_pairs = combos
 
         return deepcopy(gg)
